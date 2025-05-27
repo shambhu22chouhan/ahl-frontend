@@ -94,7 +94,8 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody),
-                mode: "cors"
+                mode: "cors",
+                credentials: 'include'
             })
                 .then(response => {
                     if (!response.ok) {
@@ -127,7 +128,9 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestBody)
+                body: JSON.stringify(requestBody),
+                mode: "cors",
+                credentials: 'include'
             })
                 .then(response => {
                     if (!response.ok) {
