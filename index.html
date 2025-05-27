@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #scanner {
+            display: none;
+            margin-top: 20px;
+        }
+
+        video {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+        }
+
+        input,
+        button {
+            display: block;
+            margin-top: 10px;
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .visible {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Register Page -->
+    <div id="registerPage" class="page visible">
+        <h2>Register</h2>
+        <input id="regName" placeholder="Name" /><br>
+        <input id="regEmail" placeholder="Email" /><br>
+        <input id="regContact" placeholder="Contact Number" /><br>
+        <input id="regPassword" type="password" placeholder="Password" /><br>
+        <button onclick="register()">Register</button>
+        <p><a href="#" onclick="switchPage('login-page')">Already registered? Login</a></p>
+    </div>
+
+    <div id="login-page" class="page">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email/Contact" />
+        <input type="password" id="password" placeholder="Password" />
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="welcome-page" class="page">
+        <h2>Welcome!</h2>
+        <button onclick="markAttendance()">Mark Attendance</button>
+        <!-- <div id="scanner">
+            <video id="video" autoplay></video>
+        </div> -->
+    </div>
+
+    <script>
+        const apiUrl = "https://ahl-attendance-d2d4bfg5e5dpcuf3.canadacentral-01.azurewebsites.net/";//"https://localhost:7144";
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
+            document.getElementById(pageId)?.classList.add('visible');
+        }
+
+        function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const contact = document.getElementById('regContact').value;
+            const password = document.getElementById('regPassword').value;
+            console.log('Registering', { name, email, contact, password });
+            const requestBody = {
+                name: name,
+                email: email,
+                contactNumber: contact,
+                password: password
+            };
+
+            fetch(`${apiUrl}/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody),
+                mode: "cors"
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Registration failed: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    alert('Registration successful!');
+                    switchPage('login-page');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
+                });
+            switchPage('login-page');
+        }
+
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const requestBody = {
+                email: email,
+                password: password,
+                contact: ""
+            };
+            fetch(`${apiUrl}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Login failed: " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Login successful:', data);
+                    alert('Login successful!');
+                    switchPage('welcome-page');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Login error: ' + error.message);
+                });
+        }
+
+        function markAttendance() {
+            /*const video = document.getElementById('camera');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => video.srcObject = stream)
+                .catch(err => alert("Camera access denied: " + err));*/
+                
+                fetch(`${apiUrl}/attendance?eventDetails=123567`, {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(async response => {
+                 if (!response.ok) {
+                        const errorData = await response.json().catch(() => null);
+                        const message = errorData?.message || 'Unknown error occurred';
+                        throw new Error(`Request failed: ${response.status} - ${message}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('attendanec successful:', data);
+                    alert('attendance successful!');
+                    
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('atrendance error: ' + error.message);
+                });
+        }
+    </script>
+</body>
+
+</html>
